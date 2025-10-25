@@ -1,4 +1,5 @@
 **MyGate-Style Community Visitor Management App:**
+
 Welcome to your very own Community Visitor Management System! This app lets Residents pre-authorize visitors, Guards check them in and out at the gate, and Admins oversee everything — all with security, real-time updates, and a smart AI assistant to help.
 
 **Architecture Overview:**
