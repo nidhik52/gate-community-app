@@ -17,11 +17,17 @@ Node.js & Express server connected to Firebase Admin SDK to manage users and vis
 User profiles, visitor passes, audit logs of actions, and tokens for real-time notifications.
 
 **Roles & What They Can Do:**
+
 **Resident:**	
+
 Add visitors, approve or deny visits for their home
-**Guard:**    
+
+**Guard:**   
+
 Check visitors in and out at the gate
+
 **Admin:** 	
+
 Manage users, view audit logs, and oversee everything
 
 
