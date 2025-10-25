@@ -4,16 +4,25 @@ Welcome to your very own Community Visitor Management System! This app lets Resi
 
 **Architecture Overview:**
 
-**Frontend:** Built with React, integrating Firebase Authentication for login and Firestore for data storage. It has role-based access control (RBAC), meaning users see and can do only what their role allows.
+**Frontend:** 
 
-**Backend:** Node.js & Express server connected to Firebase Admin SDK to manage users and visitor data securely, plus the OpenAI API powers the AI chat assistant.
+Built with React, integrating Firebase Authentication for login and Firestore for data storage. It has role-based access control (RBAC), meaning users see and can do only what their role allows.
 
-**Firestore Data:** User profiles, visitor passes, audit logs of actions, and tokens for real-time notifications.
+**Backend:**
+
+Node.js & Express server connected to Firebase Admin SDK to manage users and visitor data securely, plus the OpenAI API powers the AI chat assistant.
+
+**Firestore Data:** 
+
+User profiles, visitor passes, audit logs of actions, and tokens for real-time notifications.
 
 **Roles & What They Can Do:**
-**Resident:**	Add visitors, approve or deny visits for their home
-**Guard:**    Check visitors in and out at the gate
-**Admin:** 	Manage users, view audit logs, and oversee everything
+**Resident:**	
+Add visitors, approve or deny visits for their home
+**Guard:**    
+Check visitors in and out at the gate
+**Admin:** 	
+Manage users, view audit logs, and oversee everything
 
 
 **Features:**
