@@ -1,0 +1,454 @@
+/* GENERAL LAYOUT */
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 16px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9fafb;
+  color: #333;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+}
+
+.btn {
+  cursor: pointer;
+  user-select: none;
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+}
+
+.btn-outline:hover {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #111827;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+/* SPACING BETWEEN BUTTONS */
+
+.visitor-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+/* USER PASSWORD FIELD BUTTONS SPACING */
+.user-password {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-panel {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+}
+
+.admin-section {
+  margin-bottom: 2rem;
+}
+
+/* VISITOR CARDS */
+
+.visitor-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+}
+
+.visitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  font-weight: 700;
+  text-transform: capitalize;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+}
+
+.status-pending {
+  background-color: #fbbf24;
+  color: #92400e;
+}
+
+.status-approved {
+  background-color: #4ade80;
+  color: #166534;
+}
+
+.status-denied {
+  background-color: #f87171;
+  color: #991b1b;
+}
+
+.status-checked_in {
+  background-color: #60a5fa;
+  color: #1e40af;
+}
+
+.status-checked_out {
+  background-color: #d1d5db;
+  color: #374151;
+}
+
+.visitor-detail {
+  margin: 6px 0;
+}
+
+.status-message {
+  font-style: italic;
+  color: #6b7280;
+}
+
+.status-indicator.active {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.status-indicator.completed {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.status-indicator.denied {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* ADMIN MONITOR BADGE */
+
+.admin-monitor-badge {
+  padding: 8px 12px;
+  background: #e0f2fe;
+  color: #075985;
+  border-radius: 6px;
+  font-size: 12px;
+  text-align: center;
+  font-weight: 600;
+  width: 100%;
+  border: 1px solid #bae6fd;
+}
+
+@media (prefers-color-scheme: dark) {
+  .admin-monitor-badge {
+    background: rgba(8, 145, 178, 0.15);
+    color: #67e8f9;
+    border-color: rgba(8, 145, 178, 0.3);
+  }
+}
+
+/* MODALS */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* FORM */
+
+.visitor-form .form-group {
+  margin-bottom: 12px;
+}
+
+.visitor-form .form-label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.visitor-form .input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.visitor-form .textarea {
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* HEADER */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.role-badge {
+  background-color: #3b82f6;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-left: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.household-badge {
+  background-color: #fbbf24;
+  color: #92400e;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-left: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.section-subtitle {
+  font-weight: 400;
+  font-size: 16px;
+  color: #6b7280;
+  margin-left: 10px;
+}
+
+/* LOGIN */
+
+.login-card {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.input {
+  margin: 12px 0;
+  padding: 10px 15px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.error-message {
+  color: #dc2626;
+  margin-bottom: 10px;
+}
+
+/* CHAT */
+
+.chat-section {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-bottom: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.chat-message {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.chat-user {
+  background-color: #bae6fd;
+  align-self: flex-end;
+}
+
+.chat-assistant {
+  background-color: #dbeafe;
+  align-self: flex-start;
+}
+
+.function-indicator {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #2563eb;
+}
+
+.chat-input-area {
+  display: flex;
+  margin-top: 12px;
+}
+
+.chat-input {
+  flex-grow: 1;
+  padding: 10px 14px;
+  border-radius: 6px 0 0 6px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 14px;
+  resize: none;
+}
+
+.btn-send {
+  border-radius: 0 6px 6px 0;
+  min-width: 60px;
+  font-size: 18px;
+}
+
+/* AUDIT LOGS */
+.audit-logs {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.log-item {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.log-icon {
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+.log-details {
+  flex-grow: 1;
+}
+
+.log-type {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.log-payload {
+  font-size: 13px;
+  margin: 4px 0;
+}
+
+.log-timestamp {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* NOTIFICATION TOAST */
+.notification-toast {
+  background: #2563eb;
+  color: white;
+  padding: 15px;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  border-radius: 6px;
+  z-index: 9999;
+  max-width: 300px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ADMIN PANEL FORM */
+.user-form .input {
+  margin-bottom: 12px;
+}
