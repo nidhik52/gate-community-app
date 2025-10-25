@@ -32,12 +32,30 @@ Manage users, view audit logs, and oversee everything
 
 
 **Features:**
-**Visitor Pre-authorization:** Residents can request, approve, or deny visitors.
-**Gate Check-in/out:** Guards manage visitor entry and exit.
-**Real-time Push Notifications:** Users get updates on visitor status instantly.
-**AI Copilot:** Chat naturally with the AI to manage visitors using plain language commands.
-**Audit Logs:** Every action is logged for accountability.
-**Secure Authentication:** Firebase Authentication with custom roles ensures safe access.
+
+**Visitor Pre-authorization:** 
+
+Residents can request, approve, or deny visitors.
+
+**Gate Check-in/out:** 
+
+Guards manage visitor entry and exit.
+
+**Real-time Push Notifications:**
+
+Users get updates on visitor status instantly.
+
+**AI Copilot:** 
+
+Chat naturally with the AI to manage visitors using plain language commands.
+
+**Audit Logs:** 
+
+Every action is logged for accountability.
+
+**Secure Authentication:** 
+
+Firebase Authentication with custom roles ensures safe access.
 
 **How to Run Locally:**
 1. Clone this repo.
@@ -49,6 +67,7 @@ Manage users, view audit logs, and oversee everything
 7. Visit http://localhost:3000 and start testing!
 
 **Cost Estimate:**
+
 **Mostly low** — Firebase Authentication + Firestore are generous on free tier.
 OpenAI API costs depend on usage; this app uses minimal tokens for chatting.
 **Typical monthly estimate:** under $10 for small community use.
