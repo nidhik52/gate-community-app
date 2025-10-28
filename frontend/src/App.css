@@ -1,4 +1,9 @@
-/* GENERAL LAYOUT */
+body, .container {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #7c3aed 0%, #a5b4fc 100%);
+  background-attachment: fixed;
+}
+
 
 .container {
   max-width: 1200px;
@@ -54,8 +59,6 @@ h1, h2, h3 {
   background-color: #d1d5db;
 }
 
-/* SPACING BETWEEN BUTTONS */
-
 .visitor-actions {
   margin-top: 12px;
   display: flex;
@@ -63,7 +66,7 @@ h1, h2, h3 {
   flex-wrap: wrap;
 }
 
-/* USER PASSWORD FIELD BUTTONS SPACING */
+
 .user-password {
   display: flex;
   align-items: center;
@@ -83,7 +86,6 @@ h1, h2, h3 {
   margin-bottom: 2rem;
 }
 
-/* VISITOR CARDS */
 
 .visitor-card {
   background: white;
@@ -156,7 +158,6 @@ h1, h2, h3 {
   font-weight: 600;
 }
 
-/* ADMIN MONITOR BADGE */
 
 .admin-monitor-badge {
   padding: 8px 12px;
@@ -178,7 +179,6 @@ h1, h2, h3 {
   }
 }
 
-/* MODALS */
 
 .modal-overlay {
   position: fixed;
@@ -209,7 +209,6 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
-/* FORM */
 
 .visitor-form .form-group {
   margin-bottom: 12px;
@@ -239,7 +238,6 @@ h1, h2, h3 {
   gap: 12px;
 }
 
-/* HEADER */
 
 .header {
   display: flex;
@@ -283,7 +281,6 @@ h1, h2, h3 {
   margin-left: 10px;
 }
 
-/* LOGIN */
 
 .login-card {
   max-width: 400px;
@@ -311,7 +308,6 @@ h1, h2, h3 {
   margin-bottom: 10px;
 }
 
-/* CHAT */
 
 .chat-section {
   background: white;
@@ -382,7 +378,7 @@ h1, h2, h3 {
   font-size: 18px;
 }
 
-/* AUDIT LOGS */
+
 .audit-logs {
   background: white;
   padding: 15px;
@@ -424,7 +420,7 @@ h1, h2, h3 {
   color: #6b7280;
 }
 
-/* NOTIFICATION TOAST */
+
 .notification-toast {
   background: #2563eb;
   color: white;
@@ -448,7 +444,7 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
-/* ADMIN PANEL FORM */
+
 .user-form .input {
   margin-bottom: 12px;
 }

@@ -4,6 +4,8 @@ import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { collection, addDoc, query, where, onSnapshot, orderBy, limit, doc, setDoc } from 'firebase/firestore';
 import axios from 'axios';
 import './App.css';
+import { onMessage } from 'firebase/messaging';
+import { messaging } from './firebase';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -271,96 +273,191 @@ function AdminUserManagement({ currentUser, onUserCreated }) {
 }
 
 // Visitor Creation Form Component
-function VisitorCreationForm({ currentUser, householdId, onClose, onSuccess }) {
+function VisitorCreationForm({ onClose, currentUser, householdId }) {
   const [visitorName, setVisitorName] = useState('');
   const [visitorPhone, setVisitorPhone] = useState('');
   const [visitPurpose, setVisitPurpose] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!visitorName.trim()) {
       alert('Please enter visitor name');
       return;
     }
-    setLoading(true);
+
     try {
-      await addDoc(collection(db, 'visitors'), {
-        name: visitorName.trim(),
-        phone: visitorPhone.trim() || 'N/A',
-        purpose: visitPurpose.trim() || 'General visit',
-        status: 'pending',
-        householdId: householdId,
-        createdBy: currentUser.uid,
-        createdAt: new Date()
+      setCreating(true);
+      
+      // Get Firebase auth token
+      const token = await currentUser.getIdToken();
+      
+      // Call backend API
+      const response = await fetch('http://localhost:8080/api/visitors/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: visitorName.trim(),
+          phone: visitorPhone.trim(),
+          purpose: visitPurpose.trim()
+        })
       });
-      alert('✅ Visitor request created successfully!');
-      onSuccess();
-      onClose();
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        alert('✅ Visitor request created successfully!');
+        setVisitorName('');
+        setVisitorPhone('');
+        setVisitPurpose('');
+        onClose();
+      } else {
+        alert('❌ Error: ' + (data.error || 'Failed to create visitor'));
+      }
     } catch (error) {
-      alert('❌ Error creating visitor: ' + error.message);
+      console.error('Error creating visitor:', error);
+      alert('Failed to create visitor request. Check console for details.');
     } finally {
-      setLoading(false);
+      setCreating(false);
     }
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>➕ Request Visitor Pass</h3>
-          <button onClick={onClose} className="modal-close">✕</button>
-        </div>
-        <form onSubmit={handleSubmit} className="visitor-form">
-          <div className="form-group">
-            <label className="form-label">Visitor Name *</label>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        background: 'white',
+        padding: '30px',
+        borderRadius: '10px',
+        maxWidth: '500px',
+        width: '90%',
+        position: 'relative'
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            color: '#666'
+          }}
+        >
+          ×
+        </button>
+
+        <h2 style={{ marginBottom: '20px', color: '#333' }}>
+          ➕ Request Visitor Pass
+        </h2>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Visitor Name *
+            </label>
             <input
               type="text"
               value={visitorName}
               onChange={(e) => setVisitorName(e.target.value)}
-              placeholder="Enter visitor's full name"
-              className="input"
-              disabled={loading}
+              placeholder="Enter visitor name"
               required
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                fontSize: '14px'
+              }}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Phone Number</label>
+
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Phone Number
+            </label>
             <input
               type="tel"
               value={visitorPhone}
               onChange={(e) => setVisitorPhone(e.target.value)}
               placeholder="Enter phone number (optional)"
-              className="input"
-              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                fontSize: '14px'
+              }}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Purpose of Visit</label>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Purpose of Visit
+            </label>
             <textarea
               value={visitPurpose}
               onChange={(e) => setVisitPurpose(e.target.value)}
-              placeholder="e.g., Delivery, Meeting, Social visit"
-              className="input textarea"
+              placeholder="E.g., Friend visit, Delivery, etc."
               rows="3"
-              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                fontSize: '14px',
+                resize: 'vertical'
+              }}
             />
           </div>
-          <div className="modal-actions">
-            <button 
+
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+            <button
               type="button"
-              onClick={onClose} 
-              className="btn btn-outline"
-              disabled={loading}
+              onClick={onClose}
+              disabled={creating}
+              style={{
+                padding: '10px 20px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                background: 'white',
+                cursor: creating ? 'not-allowed' : 'pointer',
+                fontSize: '14px'
+              }}
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
-              className="btn btn-primary"
-              disabled={loading}
+            <button
+              type="submit"
+              disabled={creating}
+              style={{
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '5px',
+                background: creating ? '#ccc' : '#7c3aed',
+                color: 'white',
+                cursor: creating ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
             >
-              {loading ? 'Creating...' : 'Create Request'}
+              {creating ? 'Creating...' : 'Create Request'}
             </button>
           </div>
         </form>
@@ -368,6 +465,7 @@ function VisitorCreationForm({ currentUser, householdId, onClose, onSuccess }) {
     </div>
   );
 }
+
 
 // Audit Logs Viewer Component
 function AuditLogsViewer() {
@@ -580,6 +678,42 @@ function App() {
         .catch((err) => console.error('Notification error:', err));
     }
   }, [currentUser, notificationsEnabled]);
+
+
+// Foreground notification listener
+// Add notification listener with ALERT for visible proof
+useEffect(() => {
+  if (currentUser && notificationsEnabled) {
+    onMessageListener()
+      .then((payload) => {
+        console.log('📩 Foreground notification received:', payload);
+        
+        // SHOW ALERT FOR DEMO PROOF
+        if (payload.notification) {
+          alert(`🔔 PUSH NOTIFICATION RECEIVED\n\n${payload.notification.title}\n\n${payload.notification.body}`);
+        }
+        
+        // Also set the toast notification
+        setNotification({
+          title: payload.notification.title,
+          body: payload.notification.body
+        });
+
+        // Browser notification
+        if (Notification.permission === 'granted') {
+          new Notification(payload.notification.title, {
+            body: payload.notification.body,
+            icon: '/favicon.ico'
+          });
+        }
+
+        setTimeout(() => setNotification(null), 5000);
+      })
+      .catch((err) => console.error('Notification error:', err));
+  }
+}, [currentUser, notificationsEnabled]);
+
+
 
   useEffect(() => {
     if (currentUser && messages.length > 0) {

@@ -31,42 +31,32 @@ export { messaging };
 const VAPID_KEY = 'BG9Yhqh6DkCoAW_he35-vjqj8hmuvXdl_RiFFhVl2qR_4HFCL0CvzZcrFEiAIscdlgaiulRpuB7oZGY2mexn0yU';
 
 export const requestNotificationPermission = async () => {
-  if (!messaging) {
-    console.warn('⚠️ Messaging not available');
-    return null;
-  }
-
   try {
-    console.log('📢 Requesting notification permission...');
-    
-    if (!('Notification' in window)) {
-      console.warn('⚠️ This browser does not support notifications');
-      return null;
-    }
-
     const permission = await Notification.requestPermission();
     
     if (permission === 'granted') {
       console.log('✅ Notification permission granted');
       
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+      // Get token without VAPID key
+      const currentToken = await getToken(messaging);
       
-      if (token) {
-        console.log('🔑 FCM Token obtained');
-        return token;
+      if (currentToken) {
+        console.log('✅ FCM Token obtained:', currentToken);
+        return currentToken;
       } else {
-        console.warn('⚠️ No FCM token available');
+        console.log('❌ No token available');
         return null;
       }
     } else {
-      console.warn('❌ Notification permission denied');
+      console.log('❌ Notification permission denied');
       return null;
     }
   } catch (error) {
-    console.error('Error getting FCM token:', error);
+    console.error('Error getting notification permission:', error);
     return null;
   }
 };
+
 
 export const onMessageListener = () => {
   if (!messaging) {

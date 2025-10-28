@@ -1,7 +1,7 @@
 const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
-const OpenAI = require('openai');
+const Groq = require('groq-sdk');
 require('dotenv').config();
 
 // Initialize Firebase Admin
@@ -11,8 +11,8 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
+const groq = new Groq({ 
+  apiKey: process.env.GROQ_API_KEY 
 });
 
 const app = express();
@@ -89,6 +89,71 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
+// create visitor endpoint
+app.post('/api/visitors/create', verifyToken, async (req, res) => {
+  try {
+    const { name, phone, purpose } = req.body;
+    const userRole = req.user.role;
+    const householdId = req.user.householdId;
+
+    if (userRole !== 'resident') {
+      return res.status(403).json({ error: 'Only residents can create visitors' });
+    }
+
+    if (!householdId) {
+      return res.status(403).json({ error: 'Resident must have household assigned' });
+    }
+
+    if (!name) {
+      return res.status(400).json({ error: 'Visitor name is required' });
+    }
+
+    const visitorRef = await db.collection('visitors').add({
+      name: name.trim(),
+      phone: phone?.trim() || 'N/A',
+      purpose: purpose?.trim() || 'General visit',
+      status: 'pending',
+      householdId,
+      createdBy: req.user.uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    await logEvent('visitor_created', req.user.uid, {
+      visitorId: visitorRef.id,
+      visitorName: name,
+      householdId
+    });
+
+    // Notify the creator
+    await sendNotification(
+      req.user.uid,
+      '📝 Visitor Request Created',
+      `Your request for ${name} has been created and is pending approval.`,
+      { type: 'visitor_created', visitorId: visitorRef.id, visitorName: name }
+    );
+
+    // Notify all admins
+    const adminsSnapshot = await db.collection('users').where('role', '==', 'admin').get();
+    for (const adminDoc of adminsSnapshot.docs) {
+      await sendNotification(
+        adminDoc.id,
+        '🆕 New Visitor Request',
+        `${name} (${householdId}) is awaiting approval.`,
+        { type: 'new_pending_visitor', visitorId: visitorRef.id }
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'Visitor request created successfully',
+      visitorId: visitorRef.id
+    });
+  } catch (error) {
+    console.error('Create visitor error:', error);
+    res.status(500).json({ error: 'Failed to create visitor', details: error.message });
+  }
+});
+
 // Resident approves visitor
 app.post('/api/approve', verifyToken, async (req, res) => {
   try {
@@ -122,7 +187,11 @@ app.post('/api/approve', verifyToken, async (req, res) => {
       approvedAt: admin.firestore.FieldValue.serverTimestamp()
     });
     await logEvent('approval', req.user.uid, { visitorId, visitorName: visitor.name, householdId: visitor.householdId || 'N/A' });
+    
+    // Notify the creator/resident who requested the visitor
     await sendNotification(visitor.createdBy, '✅ Visitor Approved', `${visitor.name} has been approved and can now visit.`, { type: 'approval', visitorId, visitorName: visitor.name });
+    
+    // Notify all guards
     const guardsSnapshot = await db.collection('users').where('role', '==', 'guard').get();
     for (const guardDoc of guardsSnapshot.docs) {
       await sendNotification(guardDoc.id, '🚪 New Approved Visitor', `${visitor.name} (${visitor.householdId}) is approved for check-in.`, { type: 'approved_for_checkin', visitorId });
@@ -202,7 +271,10 @@ app.post('/api/checkin', verifyToken, async (req, res) => {
       checkedInAt: admin.firestore.FieldValue.serverTimestamp()
     });
     await logEvent('checkin', req.user.uid, { visitorId, visitorName: visitor.name, householdId: visitor.householdId || 'N/A' });
+    
+    // Notify the resident who created the visitor
     await sendNotification(visitor.createdBy, '🚪 Visitor Checked In', `${visitor.name} has arrived and checked in at the gate.`, { type: 'checkin', visitorId });
+    
     res.json({ success: true, message: `${visitor.name} checked in successfully` });
   } catch (error) {
     console.error('Check-in error:', error);
@@ -236,6 +308,16 @@ app.post('/api/checkout', verifyToken, async (req, res) => {
       checkedOutAt: admin.firestore.FieldValue.serverTimestamp()
     });
     await logEvent('checkout', req.user.uid, { visitorId, visitorName: visitor.name, householdId: visitor.householdId || 'N/A' });
+    
+    // Notify the resident who created the visitor about checkout
+    await sendNotification(visitor.createdBy, '🚶 Visitor Checked Out', `${visitor.name} has left and checked out successfully.`, { type: 'checkout', visitorId });
+    
+    // Notify guards about checkout completion
+    const guardsSnapshot = await db.collection('users').where('role', '==', 'guard').get();
+    for (const guardDoc of guardsSnapshot.docs) {
+      await sendNotification(guardDoc.id, '✅ Visitor Checked Out', `${visitor.name} (${visitor.householdId}) has checked out.`, { type: 'checkout_complete', visitorId });
+    }
+    
     res.json({ success: true, message: `${visitor.name} checked out successfully` });
   } catch (error) {
     console.error('Check-out error:', error);
@@ -468,8 +550,8 @@ Be helpful and conversational.`;
       { role: 'user', content: message }
     ];
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
       messages,
       tools,
       tool_choice: 'auto'
@@ -486,7 +568,7 @@ Be helpful and conversational.`;
 
       switch (functionName) {
         case 'approve_visitor':
-          const approveRes = await fetch(`http://localhost:${process.env.PORT}/api/approve`, {
+          const approveRes = await fetch(`http://localhost:${process.env.PORT || 8080}/api/approve`, {
             method: 'POST',
             headers: {
               'Authorization': req.headers.authorization,
@@ -498,7 +580,7 @@ Be helpful and conversational.`;
           break;
 
         case 'deny_visitor':
-          const denyRes = await fetch(`http://localhost:${process.env.PORT}/api/deny`, {
+          const denyRes = await fetch(`http://localhost:${process.env.PORT || 8080}/api/deny`, {
             method: 'POST',
             headers: {
               'Authorization': req.headers.authorization,
@@ -510,7 +592,7 @@ Be helpful and conversational.`;
           break;
 
         case 'checkin_visitor':
-          const checkinRes = await fetch(`http://localhost:${process.env.PORT}/api/checkin`, {
+          const checkinRes = await fetch(`http://localhost:${process.env.PORT || 8080}/api/checkin`, {
             method: 'POST',
             headers: {
               'Authorization': req.headers.authorization,
@@ -522,7 +604,7 @@ Be helpful and conversational.`;
           break;
 
         case 'checkout_visitor':
-          const checkoutRes = await fetch(`http://localhost:${process.env.PORT}/api/checkout`, {
+          const checkoutRes = await fetch(`http://localhost:${process.env.PORT || 8080}/api/checkout`, {
             method: 'POST',
             headers: {
               'Authorization': req.headers.authorization,
@@ -546,8 +628,8 @@ Be helpful and conversational.`;
           functionResult = { error: 'Unknown function' };
       }
 
-      const secondCompletion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+      const secondCompletion = await groq.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
         messages: [
           ...messages,
           responseMessage,
@@ -604,7 +686,7 @@ app.listen(PORT, () => {
 ║   AI Copilot: ✅ Enabled                        ║
 ║   Notifications: ✅ Enabled                     ║
 ║   Audit Logs: ✅ Active                         ║
-║   RBAC: ✅ Resident Approves                   ║
+║   RBAC: ✅ All Roles                           ║
 ╚════════════════════════════════════════════════╝
   `);
 });
